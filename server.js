@@ -7,13 +7,12 @@ const URL = require("./models/url");
 var BodyParser = require("body-parser");
 const dns = require("dns");
 const urlparser = require("url");
+
 const app = express();
-
-
 
 const connectDB = require('./configs/db');
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 connectDB();
 
@@ -26,12 +25,6 @@ app.use('/public', express.static(`${process.cwd()}/public`));
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
-
-app.get('/api/hello', function (req, res) {
-  res.json({ greeting: 'hello API' });
-});
-
-
 app.listen(port, function () {
   console.log(`Listening on port ${port}`);
 });
@@ -52,21 +45,24 @@ app.post("/api/shorturl", async (req, res) => {
           console.log("Record found in DB");
           res.json({
             original_url: url,
-            short_url: urlCode
-          })
+            short_url: urlCode,
+            new_url: "/" + urlCode
+          });
         }
         else {
           console.log("record not found in DB, creating a new one..");
           let newUrl = new URL({
             original_url: url,
-            short_url: urlCode
+            short_url: urlCode,
+            
           });
           newUrl.save((err) => {
             if (err) return console.log(err);
-            res.json({
+            res.send({
               original_url: url,
-              short_url: urlCode
-            })
+              short_url: urlCode,
+              new_url: "/" + urlCode
+            });
           })
         }
       })
@@ -74,7 +70,7 @@ app.post("/api/shorturl", async (req, res) => {
   })
 });
 
-app.get("/api/shorturl/:short_url", async (req, res) => {
+app.get("/:short_url", async (req, res) => {
   try {
     const doc = await URL.findOne({
       short_url: req.params.short_url
@@ -84,6 +80,6 @@ app.get("/api/shorturl/:short_url", async (req, res) => {
   catch (err) {
     res.json({
       error: 'invalid url'
-    })
+    });
   }
-})
+});

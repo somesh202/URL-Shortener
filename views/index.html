@@ -3,31 +3,85 @@
 <html>
 
 <head>
-  <title>URL Shortener Microservice | freeCodeCamp.org</title>
-  <link rel="icon" type="image/png" href="https://cdn.freecodecamp.org/universal/favicons/favicon-16x16.png" />
+  <title>URL Shortener Microservice</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <link href="/public/style.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
 </head>
 
 <body>
   <h1>URL Shortener Microservice</h1>
   <main>
     <section>
-      <form action="api/shorturl" method="POST">
-        <fieldset>
-          <legend>URL Shortener</legend>
-          <label for="url_input">URL:</label>
-          <input id="url_input" type="text" name="url" placeholder="https://example.com" />
-          <input type="submit" value="POST URL" />
-        </fieldset>
+      <form action="api/shorturl" method="POST" class="url-form">
+        <label for="url_input">URL:</label>
+        <input id="url_input" class="form-control" type="url" name="url" placeholder="Enter the URL" />
+        <button type="submit" class="btn btn-primary">Shorten URL</button>
       </form>
     </section>
-  </main>
-  <footer>
-    <p><a href="https://github.com/somesh202"><i class="fab fa-github"></i></a></p>
-  </footer>
-</body> 
+    <div class="loader" id="loader">
+    </div>
+    <h2>Short URL: </h2>
+    <div class="result-section">
+
+    </div>
+    <button class="copy btn-secondary" onclick="copyTextFromElement()">Copy</button>
+
+
+
+    <script src="main.js"></script>
+</body>
+<script>
+  function copyTextFromElement() {
+    let element = document.querySelector('.result-section'); //select the element
+    let elementText = element.textContent; //get the text content from the element
+    copyText(elementText); //use the copyText function below
+    //   document.querySelector('.copy').innerText = "Copied";
+  }
+  function copyText(text) {
+    navigator.clipboard.writeText(text);
+  }
+  const form = document.querySelector('.url-form');
+  const result = document.querySelector('.result-section');
+  form.addEventListener('submit', event => {
+    result.style.display = 'block';
+    document.querySelector('.copy').style.display = 'block';
+    event.preventDefault();
+    console.log("submt");
+    const input = document.querySelector('#url_input');
+    console.log(input);
+    fetch('api/shorturl', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url: input.value,
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        while (result.hasChildNodes()) {
+          result.removeChild(result.lastChild);
+        }
+
+        result.innerHTML = `<a href=${data.new_url}><h4>${location.origin}${data.new_url}</h4></a>`;
+      })
+      .catch(console.error)
+    document.querySelector('#loader').classList.remove("hide-loader");
+  });
+
+</script>
 
 </html>
