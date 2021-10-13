@@ -68,7 +68,7 @@ display:block;
 }
 
 .result-section {
-  width: 80%;
+  width: 80vw;
   height: 50px;
   margin: auto;
   display: none;
@@ -101,8 +101,11 @@ display:block;
 .check {
   display: none;
 }
-@media (min-width: 578px) {
+@media (max-width: 578px) {
   form {
-   width: 100%;
+   width: 100vw;
+  }
+  input {
+    width: 60vw;
   }
 }
